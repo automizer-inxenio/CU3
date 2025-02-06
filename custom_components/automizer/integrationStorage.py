@@ -1,0 +1,10 @@
+allEntities = []
+binarySensors = []
+temperatureSensors = []
+humiditySensors = []
+switches = []
+lights = []
+numbers = []
+textSensors = []
+ic = None
+haCoreId = None
