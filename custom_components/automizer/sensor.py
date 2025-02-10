@@ -12,12 +12,12 @@ class InelsBinarySensor(BinarySensorEntity):
 	def is_on(self):return self._attr_is_on
 	def update(A):A.schedule_update_ha_state()
 class InelsTemperatureSensor(SensorEntity):
-	def __init__(A,inelsName,inelsId):C=inelsId;B=inelsName;A._attr_name=B;A._attr_native_unit_of_measurement=UnitOfTemperature.CELSIUS;A._attr_native_value=77.7;A.inelsName=B;A.inelsId=C;A.unique_id=B+C;A._attr_icon='mdi:thermometer'
+	def __init__(A,inelsName,inelsId):C=inelsId;B=inelsName;A._attr_name=B;A._attr_native_unit_of_measurement=UnitOfTemperature.CELSIUS;A.inelsName=B;A.inelsId=C;A.unique_id=B+C;A._attr_icon='mdi:thermometer'
 	@property
 	def native_value(self):return self._attr_native_value
 	def update(A):A.schedule_update_ha_state()
 class InelsHumiditySensor(SensorEntity):
-	def __init__(A,inelsName,inelsId):C=inelsId;B=inelsName;A._attr_name=B;A._attr_native_unit_of_measurement=PERCENTAGE;A._attr_native_value=77.7;A.inelsName=B;A.inelsId=C;A.unique_id=B+C;A._attr_icon='mdi:water-percent'
+	def __init__(A,inelsName,inelsId):C=inelsId;B=inelsName;A._attr_name=B;A._attr_native_unit_of_measurement=PERCENTAGE;A.inelsName=B;A.inelsId=C;A.unique_id=B+C;A._attr_icon='mdi:water-percent'
 	@property
 	def native_value(self):return self._attr_native_value
 	def update(A):A.schedule_update_ha_state()
