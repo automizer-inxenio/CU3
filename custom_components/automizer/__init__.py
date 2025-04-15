@@ -15,7 +15,8 @@ from homeassistant.const import CONF_HOST,CONF_PORT
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 import asyncio
 from.const import DOMAIN,CONF_EXPORT,CONF_CU_NAME
-import re,uuid,time,os
+import re,uuid,time,os,logging
+_LOGGER=logging.getLogger(__name__)
 _PLATFORMS=[Platform.LIGHT],[Platform.SENSOR],[Platform.SWITCH]
 async def async_setup_entry(hass,entry):
 	J='0x0105';G='_status';C=entry;K=C.data[CONF_EXPORT];L=K.splitlines();M=re.compile('(?P<deviceName>[a-zA-Z0-9_-]+)\\s(?P<deviceType>[a-zA-Z0-9_-]+)\\s(?P<deviceId>[0-9A-F,x]+)')
@@ -23,7 +24,7 @@ async def async_setup_entry(hass,entry):
 		if E.startswith('_'):continue
 		F=M.match(E)
 		if F:
-			print('READ EXPORT LINE: '+E);N=F.group('deviceName');B=F.group('deviceId');D=C.data[CONF_CU_NAME]+'_'+N
+			_LOGGER.info(f"READ EXPORT LINE: {E}");N=F.group('deviceName');B=F.group('deviceId');D=C.data[CONF_CU_NAME]+'_'+N
 			if B.startswith('0x0101'):A=s.InelsBinarySensor(D,B);storage.binarySensors.append(A);storage.allEntities.append(A)
 			if B.startswith('0x0102'):A=sw.InelsSwitch(D,B);storage.switches.append(A);storage.allEntities.append(A)
 			elif B.startswith('0x0104'):A=l.InelsLight(D,B);storage.lights.append(A);storage.allEntities.append(A)
