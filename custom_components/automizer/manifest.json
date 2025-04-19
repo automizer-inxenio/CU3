@@ -1,19 +1,18 @@
-
 {
-  "domain": "automizer",
-  "name": "automizer",
-  "version": "v0.0.6",
-  "codeowners": [
-    "@automizer-inxenio"
-  ],
-  "config_flow": true,
-  "dependencies": [],
-  "documentation": "https://github.com/automizer-inxenio/CU3/wiki",
-  "homekit": {},
-  "iot_class": "local_push",
-  "requirements": [
-    "telnetlib3 == 2.0.4"
-  ],
-  "ssdp": [],
-  "zeroconf": []
+    "domain": "automizer",
+    "name": "automizer",
+    "version": "v0.0.10",
+    "codeowners": [
+        "@automizer-inxenio"
+    ],
+    "config_flow": true,
+    "dependencies": [],
+    "documentation": "https://github.com/automizer-inxenio/CU3/wiki",
+    "homekit": {},
+    "iot_class": "local_push",
+    "requirements": [
+        "telnetlib3 == 2.0.4"
+    ],
+    "ssdp": [],
+    "zeroconf": []
 }

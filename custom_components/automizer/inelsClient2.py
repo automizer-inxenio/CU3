@@ -3,6 +3,7 @@ _A=False
 from.import switch as sw,light as l,number as n,sensor as s,objects as inelsObj,integrationStorage as storage,utils as utils
 import socket,threading,time,logging
 _LOGGER=logging.getLogger(__name__)
+INACTIVITY_TIMEOUT=10
 class InelsClient2:
 	def __init__(A,cu,entities,cuStateSensor,clientConnectionStatus):
 		A.centralUnit=cu;A.host=cu.host;A.port=cu.port;A.sock=None;A.running=_A;A.cuStateSensor=cuStateSensor;A.clientConnectionStatus=clientConnectionStatus;A.initialGet=_B;A.entities={}
@@ -11,18 +12,23 @@ class InelsClient2:
 	def connect(A):
 		while A.running:
 			try:A.sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM);A.sock.connect((A.host,A.port));_LOGGER.info(f"Conectado a {A.host}:{A.port}");A.clientConnectionStatus._attr_is_on=_B;A.clientConnectionStatus.update();A.listen()
-			except(ConnectionRefusedError,OSError):_LOGGER.error(f"Error de conexión. Reintentando en 5 segundos...");A.clientConnectionStatus._attr_is_on=_A;A.clientConnectionStatus.update()
-			A.clientConnectionStatus._attr_is_on=_A;A.clientConnectionStatus.update();time.sleep(5)
+			except(ConnectionRefusedError,OSError)as B:_LOGGER.error(f"Error de conexión: {B}. Reintentando en 5 segundos...");A.clientConnectionStatus._attr_is_on=_A;A.clientConnectionStatus.update();time.sleep(5)
+			finally:
+				if A.sock:A.sock.close()
 	def listen(A):
 		B=''
 		try:
+			A.sock.settimeout(INACTIVITY_TIMEOUT)
 			while A.running:
-				C=A.sock.recv(1024)
-				if not C:break
-				B+=C.decode()
-				while'\n'in B:D,B=B.split('\n',1);A.processLine(D)
-		except(ConnectionResetError,OSError):_LOGGER.error(f"Conexión perdida. Intentando reconectar...");A.clientConnectionStatus._attr_is_on=_A;A.clientConnectionStatus.update()
-		finally:A.sock.close()
+				try:
+					C=A.sock.recv(1024)
+					if not C:break
+					B+=C.decode()
+					while'\n'in B:D,B=B.split('\n',1);A.processLine(D)
+				except socket.timeout:_LOGGER.warning(f"No se recibió información en {INACTIVITY_TIMEOUT} segundos. Cerrando conexión...");break
+		except(ConnectionResetError,OSError)as E:_LOGGER.error(f"Conexión perdida: {E}. Intentando reconectar...");A.clientConnectionStatus._attr_is_on=_A;A.clientConnectionStatus.update()
+		finally:
+			if A.sock:A.sock.close()
 	def processLine(E,line):
 		I=' ';G='0';D=line
 		if D.startswith('GETSTATUS'):C=D.split(I);J=C[1].strip();E.cuStateSensor._attr_native_value=J;E.cuStateSensor.update()
@@ -66,8 +72,8 @@ class InelsClient2:
 				_LOGGER.warning('Conexión no operativa. Intentando reconectar...')
 				try:A.sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM);A.sock.connect((A.host,A.port));_LOGGER.info(f"Reconectado a {A.host}:{A.port}");A.clientConnectionStatus._attr_is_on=_B;A.clientConnectionStatus.update()
 				except(ConnectionRefusedError,OSError)as B:_LOGGER.error(f"No se pudo reconectar: {B}");A.clientConnectionStatus._attr_is_on=_A;A.clientConnectionStatus.update();return
-			try:A.sock.sendall((line+'\r\n').encode());_LOGGER.info(f"Línea enviada: {line}")
-			except(BrokenPipeError,OSError)as B:_LOGGER.error(f"Error al enviar la línea: {B}");A.clientConnectionStatus._attr_is_on=_A;A.clientConnectionStatus.update()
+			try:A.sock.sendall((line+'\r\n').encode())
+			except(BrokenPipeError,OSError)as B:_LOGGER.error('Error al enviar la línea: %s',B);A.clientConnectionStatus._attr_is_on=_A;A.clientConnectionStatus.update()
 	def start(A):A.running=_B;A.thread=threading.Thread(target=A.connect);A.thread.start()
 	def stop(A):
 		A.running=_A
