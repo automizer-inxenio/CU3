@@ -31,7 +31,7 @@ class InelsClient2:
 			if A.sock:A.sock.close()
 	def processLine(E,line):
 		I=' ';G='0';D=line
-		if D.startswith('GETSTATUS'):C=D.split(I);J=C[1].strip();E.cuStateSensor._attr_native_value=J;E.cuStateSensor.update()
+		if D.startswith('GETSTATUS'):C=D.split(I);K=C[1].strip();E.cuStateSensor._attr_native_value=K;E.cuStateSensor.update()
 		elif D.startswith('EVENT'):
 			C=D.split(I);H=C[2].strip().lower();B=C[3].strip();A=E.entities.get(H)
 			if A:
@@ -43,7 +43,7 @@ class InelsClient2:
 				elif isinstance(A.entity,sw.InelsSwitch):
 					if B==G:A.entity._state=_A
 					else:A.entity._state=_B
-				elif isinstance(A.entity,n.InelsNumber):A.entity._attr_value=int(B)
+				elif isinstance(A.entity,n.InelsNumber):J=A.entity.decimals;L=round(int(B)/10**J,J);A.entity._attr_value=L
 				elif isinstance(A.entity,l.InelsLight):
 					F=utils.scaleValue0255(int(B))
 					if F==0:A.entity._state=_A
