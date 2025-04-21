@@ -1,0 +1,8 @@
+automizer:
+  numbers:
+    - name: "NOMBRE_EJEMPLO1"
+      decimals: 2
+    - name: "NOMBRE_EJEMPLO2"
+      decimals: 3
+    - name: "CU1_int_21grados"
+      decimals: 2
