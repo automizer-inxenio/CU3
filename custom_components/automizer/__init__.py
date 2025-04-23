@@ -41,6 +41,7 @@ async def async_setup_entry(hass,entry):
 	for H in storage.allEntities:storage.ic.sendLine('GET '+H.inelsId);await asyncio.sleep(.2)
 	return True
 async def async_unload_entry(hass,entry):'Unload a config entry.';return await hass.config_entries.async_unload_platforms(entry,_PLATFORMS)
+async def async_reload_entry(hass,entry):'Recargar una entrada de configuración.';A=entry;_LOGGER.info(f"Recargando la integración {A.title}");await async_unload_entry(hass,A);return await async_setup_entry(hass,A)
 def read_yaml_file(file_path):
 	'Función auxiliar para leer un archivo YAML.'
 	with open(file_path,'r')as A:return yaml.safe_load(A)
