@@ -30,44 +30,44 @@ class InelsClient2:
 		finally:
 			if A.sock:A.sock.close()
 	def processLine(E,line):
-		H='0';G=' ';D=line
-		if D.startswith('GETSTATUS'):C=D.split(G);I=C[1].strip();E.cuStateSensor._attr_native_value=I;E.cuStateSensor.update()
-		elif D.startswith('EVENTSTATUS'):C=D.split(G);I=C[1].strip();E.cuStateSensor._attr_native_value=I;E.cuStateSensor.update()
+		I='0';H=' ';D=line
+		if D.startswith('GETSTATUS'):C=D.split(H);J=C[1].strip();E.cuStateSensor._attr_native_value=J;E.cuStateSensor.update()
+		elif D.startswith('EVENTSTATUS'):C=D.split(H);J=C[1].strip();E.cuStateSensor._attr_native_value=J;E.cuStateSensor.update()
 		elif D.startswith('EVENT'):
-			C=D.split(G);J=C[2].strip().lower();B=C[3].strip();A=E.entities.get(J)
+			C=D.split(H);K=C[2].strip().lower();B=C[3].strip();A=E.entities.get(K)
 			if A:
 				if isinstance(A.entity,s.InelsTemperatureSensor):A.entity._attr_native_value=int(B)/100
 				elif isinstance(A.entity,s.InelsHumiditySensor):A.entity._attr_native_value=int(B)/100
 				elif isinstance(A.entity,s.InelsBinarySensor):
-					if B==H:A.entity._attr_is_on=_A
+					if B==I:A.entity._attr_is_on=_A
 					else:A.entity._attr_is_on=_B
 				elif isinstance(A.entity,sw.InelsSwitch):
-					if B==H:A.entity._state=_A
+					if B==I:A.entity._state=_A
 					else:A.entity._state=_B
-				elif isinstance(A.entity,n.InelsNumber):K=A.entity.decimals;L=round(int(B)/10**K,K);A.entity._attr_value=L
+				elif isinstance(A.entity,n.InelsNumber):F=A.entity.decimals;L=round(int(B)/10**F,F);A.entity._attr_value=L
 				elif isinstance(A.entity,l.InelsLight):
-					F=utils.scaleValue0255(int(B))
-					if F==0:A.entity._state=_A
-					else:A.entity._state=_B;A.entity._brightness=F
+					G=utils.scaleValue0255(int(B))
+					if G==0:A.entity._state=_A
+					else:A.entity._state=_B;A.entity._brightness=G
 				A.entity.update()
 		elif D.startswith('GET')and E.initialGet:
-			C=D.split(G);J=C[1].strip().lower();B=C[2].strip()
+			C=D.split(H);K=C[1].strip().lower();B=C[2].strip()
 			if not B.isdigit():return
-			A=E.entities.get(J)
+			A=E.entities.get(K)
 			if A:
 				if isinstance(A.entity,s.InelsTemperatureSensor):A.entity._attr_native_value=int(B)/100
 				elif isinstance(A.entity,s.InelsHumiditySensor):A.entity._attr_native_value=int(B)/100
 				elif isinstance(A.entity,s.InelsBinarySensor):
-					if B==H:A.entity._attr_is_on=_A
+					if B==I:A.entity._attr_is_on=_A
 					else:A.entity._attr_is_on=_B
 				elif isinstance(A.entity,sw.InelsSwitch):
-					if B==H:A._state=_A
+					if B==I:A._state=_A
 					else:A.entity._state=_B
-				elif isinstance(A.entity,n.InelsNumber):A.entity._attr_value=int(B)
+				elif isinstance(A.entity,n.InelsNumber):F=A.entity.decimals;L=round(int(B)/10**F,F);A.entity._attr_value=L
 				elif isinstance(A.entity,l.InelsLight):
-					F=int(B)
-					if F==0:A.entity._state=_A
-					else:A.entity._state=_B;A.entity._brightness=F
+					G=int(B)
+					if G==0:A.entity._state=_A
+					else:A.entity._state=_B;A.entity._brightness=G
 				A.entity.update()
 	def sendLine(A,line):
 		with A.lock:
