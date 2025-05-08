@@ -19,28 +19,28 @@ import re,uuid,time,os,logging,yaml
 _LOGGER=logging.getLogger(__name__)
 _PLATFORMS=[Platform.LIGHT,Platform.SENSOR,Platform.SWITCH,Platform.NUMBER]
 async def async_setup_entry(hass,entry):
-	P='0x0105';K='_status';E=hass;C=entry
+	Q='0x0105';K='_status';E=hass;C=entry
 	if DOMAIN not in E.data:E.data[DOMAIN]={}
 	if C.entry_id in E.data[DOMAIN]:_LOGGER.warning(f"La entrada {C.entry_id} ya está configurada.");return False
-	E.data[DOMAIN][C.entry_id]={};Q=C.data[CONF_EXPORT];R=Q.splitlines();S=re.compile('(?P<deviceName>[a-zA-Z0-9_-]+)\\s(?P<deviceType>[a-zA-Z0-9_-]+)\\s(?P<deviceId>[0-9A-F,x]+)');G=os.path.join(os.path.dirname(__file__),'configuration.yaml')
+	E.data[DOMAIN][C.entry_id]={};R=C.data[CONF_EXPORT];S=R.splitlines();T=re.compile('(?P<deviceName>[a-zA-Z0-9_-]+)\\s(?P<deviceType>[a-zA-Z0-9_-]+)\\s(?P<deviceId>[0-9A-F,x]+)');G=os.path.join(os.path.dirname(__file__),'configuration.yaml')
 	try:H=await E.async_add_executor_job(read_yaml_file,G)
 	except FileNotFoundError:_LOGGER.info(f"No se encontró el archivo {G}.");H={}
 	except yaml.YAMLError as I:_LOGGER.error(f"Error al leer el archivo {G} YAML: {I}");H={}
 	L=H.get('automizer',{}).get('numbers',[]);_LOGGER.info(f"Configuración de números cargada: {L}")
-	for F in R:
+	for F in S:
 		if F.startswith('_'):continue
-		J=S.match(F)
+		J=T.match(F)
 		if J:
-			_LOGGER.info(f"READ EXPORT LINE: {F}");T=J.group('deviceName');B=J.group('deviceId');D=C.data[CONF_CU_NAME]+'_'+T
+			_LOGGER.info(f"READ EXPORT LINE: {F}");U=J.group('deviceName');B=J.group('deviceId');D=C.data[CONF_CU_NAME]+'_'+U
 			if B.startswith('0x0101'):A=s.InelsBinarySensor(D,B);storage.binarySensors.append(A);storage.allEntities.append(A)
 			if B.startswith('0x0102'):A=sw.InelsSwitch(D,B);storage.switches.append(A);storage.allEntities.append(A)
 			elif B.startswith('0x0104'):A=l.InelsLight(D,B);storage.lights.append(A);storage.allEntities.append(A)
-			elif B.startswith(P)and'%'not in F:A=s.InelsTemperatureSensor(D,B);storage.temperatureSensors.append(A);storage.allEntities.append(A)
-			elif B.startswith(P)and'%'in F:A=s.InelsHumiditySensor(D,B);storage.humiditySensors.append(A);storage.allEntities.append(A)
+			elif B.startswith(Q)and'%'not in F:A=s.InelsTemperatureSensor(D,B);storage.temperatureSensors.append(A);storage.allEntities.append(A)
+			elif B.startswith(Q)and'%'in F:A=s.InelsHumiditySensor(D,B);storage.humiditySensors.append(A);storage.allEntities.append(A)
 			elif B.startswith('0x0203'):A=sw.InelsSwitch(D,B);storage.switches.append(A);storage.allEntities.append(A)
-			elif B.startswith('0x0202'):U=D;M=next((A.get('decimals',0)for A in L if A['name']==U),0);_LOGGER.info(f"Creando entero con decimales: {M}");A=n.InelsNumber(D,B,M);storage.numbers.append(A);storage.allEntities.append(A)
+			elif B.startswith('0x0202'):M=D;N=next((A.get('decimals',0)for A in L if A['name']==M),0);_LOGGER.info(f"Buscando en el archivo de enteros: {M}");_LOGGER.info(f"Creando entero con decimales: {N}");A=n.InelsNumber(D,B,N);storage.numbers.append(A);storage.allEntities.append(A)
 		else:continue
-	N=s.InelsTextSensor(C.data[CONF_CU_NAME]+K,C.data[CONF_CU_NAME]+K);storage.textSensors.append(N);O=s.InelsBinarySensor(C.data[CONF_CU_NAME]+'_client_connected',C.data[CONF_CU_NAME]+K);storage.binarySensors.append(O);await E.config_entries.async_forward_entry_setups(C,[Platform.SWITCH,Platform.LIGHT,Platform.NUMBER,Platform.SENSOR]);V=inelsObj.InelsCentralUnit(C.data[CONF_CU_NAME],C.data[CONF_HOST],C.data[CONF_PORT]);storage.ic=ic.InelsClient2(V,storage.allEntities,N,O);storage.ic.start();await asyncio.sleep(3);storage.ic.sendLine('GETSTATUS')
+	O=s.InelsTextSensor(C.data[CONF_CU_NAME]+K,C.data[CONF_CU_NAME]+K);storage.textSensors.append(O);P=s.InelsBinarySensor(C.data[CONF_CU_NAME]+'_client_connected',C.data[CONF_CU_NAME]+K);storage.binarySensors.append(P);await E.config_entries.async_forward_entry_setups(C,[Platform.SWITCH,Platform.LIGHT,Platform.NUMBER,Platform.SENSOR]);V=inelsObj.InelsCentralUnit(C.data[CONF_CU_NAME],C.data[CONF_HOST],C.data[CONF_PORT]);storage.ic=ic.InelsClient2(V,storage.allEntities,O,P);storage.ic.start();await asyncio.sleep(3);storage.ic.sendLine('GETSTATUS')
 	for I in storage.allEntities:storage.ic.sendLine('GET '+I.inelsId);await asyncio.sleep(.2)
 	return True
 async def async_unload_entry(hass,entry):
