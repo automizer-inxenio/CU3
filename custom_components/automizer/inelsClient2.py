@@ -44,7 +44,7 @@ class InelsClient2:
 				elif isinstance(A.entity,sw.InelsSwitch):
 					if B==J:A.entity._state=_A
 					else:A.entity._state=_B
-				elif isinstance(A.entity,n.InelsNumber):F=A.entity.decimals;H=round(int(B)/10**F,F);A.entity._attr_value=H;_LOGGER.info(f"Valor recibido sin procesar: {B}");_LOGGER.info(f"Valor recibido convertido a int: {int(B)}");_LOGGER.info(f"Decimales: {F}");_LOGGER.info(f"Valor procesado: {H}")
+				elif isinstance(A.entity,n.InelsNumber):F=A.entity.decimals;H=round(int(B)/10**F,F);A.entity._attr_value=H;_LOGGER.info(f"Valor recibido convertido a int: {int(B)}");_LOGGER.info(f"Decimales: {F}");_LOGGER.info(f"Valor procesado: {H}")
 				elif isinstance(A.entity,l.InelsLight):
 					G=utils.scaleValue0255(int(B))
 					if G==0:A.entity._state=_A
