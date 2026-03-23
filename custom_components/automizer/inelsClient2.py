@@ -77,7 +77,7 @@ class InelsClient2:
 				elif isinstance(A.entity,s.InelsHumiditySensor):A.entity._attr_native_value=int(B)/100
 				elif isinstance(A.entity,s.InelsBinarySensor):A.entity._attr_is_on=B!=I
 				elif isinstance(A.entity,sw.InelsSwitch):A.entity._state=B!=I
-				elif isinstance(A.entity,n.InelsNumber):D=A.entity.decimals;A.entity._attr_value=round(int(B)/10**D,D)
+				elif isinstance(A.entity,n.InelsNumber):D=A.entity.decimals;A.entity._attr_native_value=round(int(B)/10**D,D)
 				elif isinstance(A.entity,s.InelsAnalogSensor):
 					K=A.entity.lastUpdate+A.entity.refreshSeconds
 					if time.time()<K:return
@@ -97,8 +97,8 @@ class InelsClient2:
 				elif isinstance(A.entity,s.InelsHumiditySensor):A.entity._attr_native_value=int(B)/100
 				elif isinstance(A.entity,s.InelsBinarySensor):A.entity._attr_is_on=B!=I
 				elif isinstance(A.entity,sw.InelsSwitch):A.entity._state=B!=I
-				elif isinstance(A.entity,n.InelsNumber):D=A.entity.decimals;A.entity._attr_value=round(int(B)/10**D,D)
-				elif isinstance(A.entity,s.InelsAnalogSensor):D=A.entity.decimals;A.entity._attr_value=round(int(B)/10**D,D)
+				elif isinstance(A.entity,n.InelsNumber):D=A.entity.decimals;A.entity._attr_native_value=round(int(B)/10**D,D)
+				elif isinstance(A.entity,s.InelsAnalogSensor):D=A.entity.decimals;A.entity._attr_native_value=round(int(B)/10**D,D)
 				elif isinstance(A.entity,l.InelsLight):
 					G=int(B);A.entity._state=G!=0
 					if G!=0:A.entity._brightness=G
