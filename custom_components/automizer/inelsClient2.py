@@ -49,7 +49,9 @@ class InelsClient2:
 					with A.lock:
 						if A.sock:A.sock.sendall('GETSTATUS\r\n'.encode())
 				except OSError as C:_LOGGER.error(f"Ping fallido en {A.host}:{A.port}: {C}. Reconectando...");A.clientConnectionStatus._attr_is_on=_A;A.clientConnectionStatus.update();break
-			except(ConnectionResetError,OSError)as C:_LOGGER.error(f"Conexión perdida con {A.host}:{A.port}: {C}. Reconectando...");A.clientConnectionStatus._attr_is_on=_A;A.clientConnectionStatus.update();break
+			except(ConnectionResetError,OSError)as C:
+				if not A.running:break
+				_LOGGER.error(f"Conexión perdida con {A.host}:{A.port}: {C}. Reconectando...");A.clientConnectionStatus._attr_is_on=_A;A.clientConnectionStatus.update();break
 	def processLine(F,line):
 		I='0';H=' ';E=line
 		if not F.running or not E:return
