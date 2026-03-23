@@ -1,14 +1,49 @@
 from homeassistant.helpers.entity import ToggleEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.config_entries import ConfigEntry,ConfigType,DiscoveryInfoType
-async def async_setup_entry(hass,config_entry,async_add_entities):A=hass.data['automizer'][config_entry.entry_id];async_add_entities(A['switches'])
+from homeassistant.config_entries import ConfigEntry, ConfigType, DiscoveryInfoType
+# from . import integrationStorage as storage
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    storage = hass.data["automizer"][config_entry.entry_id]
+    async_add_entities(storage["switches"])
+
+
 class InelsSwitch(ToggleEntity):
-	def __init__(A,inelsName,inelsId):C=inelsId;B=inelsName;A._name=B;A.inelsId=C;A.inelsName=B;A._state=False;A.unique_id=B+C;A.ic=None
-	@property
-	def name(self):return self._name
-	@property
-	def is_on(self):return self._state
-	def turn_on(A,**B):A._state=True;A.ic.sendLine('SET '+A.inelsId+' 1');A.schedule_update_ha_state()
-	def turn_off(A,**B):A._state=False;A.ic.sendLine('SET '+A.inelsId+' 0');A.schedule_update_ha_state()
-	def update(A):A.schedule_update_ha_state()
+    def __init__(
+        self,
+        inelsName,
+        inelsId,
+    ):
+        self._name = inelsName
+        self.inelsId = inelsId
+        self.inelsName = inelsName
+        self._state = False
+        self.unique_id = inelsName + inelsId
+        self.ic = None
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def is_on(self):
+        return self._state
+
+    def turn_on(self, **kwargs):
+        self._state = True
+        self.ic.sendLine("SET " + self.inelsId + " 1")
+        self.schedule_update_ha_state()
+
+    def turn_off(self, **kwargs):
+        self._state = False
+        self.ic.sendLine("SET " + self.inelsId + " 0")
+        self.schedule_update_ha_state()
+
+    def update(self):
+        self.schedule_update_ha_state()
