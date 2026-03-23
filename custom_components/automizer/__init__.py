@@ -36,7 +36,7 @@ async def async_setup_entry(hass,entry):
 	except FileNotFoundError:_LOGGER.info(f"No se encontró el archivo {L}.");F={}
 	except yaml.YAMLError as d:_LOGGER.error(f"Error al leer el archivo {L} YAML: {d}");F={}
 	if F is None:_LOGGER.warning('El archivo de configuración está vacío o es inválido.');F={}
-	_LOGGER.info(f"config_data completo: {F}");O=F.get('automizer',{});_LOGGER.info(f"Sección automizer: {O}");T=O.get(_C,[]);_LOGGER.info(f"Configuración de números cargada: {T}");H=O.get('analog',[]);_LOGGER.info(f"Configuración de sensores analógicos cargada: {H}")
+	_LOGGER.info(f"config_data completo: {F}");O=F.get('automizer',{});_LOGGER.info(f"Sección automizer: {O}");T=O.get(_C,[]);_LOGGER.info(f"Configuración de números cargadaaaaaa: {T}");H=O.get('analog',[]);_LOGGER.info(f"Configuración de sensores analógicos cargada: {H}")
 	for I in b:
 		if I.startswith('_'):continue
 		P=c.match(I)
