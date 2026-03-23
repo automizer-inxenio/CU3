@@ -32,6 +32,15 @@ import yaml
 
 _LOGGER = logging.getLogger(__name__)
 
+# Prefijos de nombres internos de iNELS que no se deben exponer como entidades.
+# Respaldo para exportaciones antiguas (3 columnas) donde las líneas internas
+# no tienen prefijo "_ ". En el formato real (.is3) ya las filtra el startswith("_").
+_INTERNAL_DEVICE_PREFIXES = (
+    "Controller_",
+    "Heat-Regulator_",
+    "Cool-Regulator_",
+)
+
 # Lista de plataformas soportadas
 _PLATFORMS: list[Platform] = [
     Platform.LIGHT,
@@ -69,7 +78,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     export = entry.data[CONF_EXPORT]
     exportLines = export.splitlines()
     rDevice = re.compile(
-        r"(?P<deviceName>[a-zA-Z0-9_-]+)\s(?P<deviceType>[a-zA-Z0-9_-]+)\s(?P<deviceId>[0-9A-F,x]+)"
+        # Formato 3 columnas: nombre  ID            valor
+        # Formato 4 columnas: nombre  módulo        ID            valor
+        # El módulo (2ª columna en formato 4-col) empieza siempre por letra,
+        # nunca por "0x", así que el grupo opcional no consume el ID.
+        r"^(?P<deviceName>[a-zA-Z0-9_-]+)"
+        r"\s+(?:[A-Za-z]\S*\s+)?"
+        r"(?P<deviceId>0x[0-9A-Fa-f]+)"
     )
 
     # Primero intentar config personalizada en el directorio de HA,
@@ -119,7 +134,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _LOGGER.info(f"READ EXPORT LINE: {exportLine}")
             # print("READ EXPORT LINE: " + exportLine)
             deviceName = match.group("deviceName")
-            deviceId = match.group("deviceType")  # deviceType captures the hardware address (e.g. 0x01020001); deviceId captures the default value (always 0x00000000)
+            deviceId = match.group("deviceId")
+
+            # Filtro de respaldo: ignorar dispositivos internos de iNELS
+            # (en el formato .is3 real ya van con "_ " y son filtrados arriba)
+            if any(deviceName.startswith(p) for p in _INTERNAL_DEVICE_PREFIXES):
+                continue
+
             fullDeviceName = entry.data[CONF_CU_NAME] + "_" + deviceName
 
             # BINARY_INPUT -> sensor(bool)
