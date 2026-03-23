@@ -12,7 +12,7 @@ class InelsBinarySensor(BinarySensorEntity):
 	def is_on(self):return self._attr_is_on
 	def update(A):A.schedule_update_ha_state()
 class InelsTemperatureSensor(SensorEntity):
-	def __init__(A,inelsName,inelsId,refreshSeconds=1):C=inelsId;B=inelsName;A._attr_name=B;A._attr_native_unit_of_measurement=UnitOfTemperature.CELSIUS;A.inelsName=B;A.inelsId=C;A.unique_id=B+C;A._attr_icon='mdi:thermometer';A.ic=_A;A.refreshSeconds=refreshSeconds
+	def __init__(A,inelsName,inelsId,refreshSeconds=1):C=inelsId;B=inelsName;A._attr_name=B;A._attr_native_unit_of_measurement=UnitOfTemperature.CELSIUS;A.inelsName=B;A.inelsId=C;A.unique_id=B+C;A._attr_icon='mdi:thermometer';A.ic=_A;A.refreshSeconds=refreshSeconds;A.lastUpdate=0
 	@property
 	def native_value(self):return self._attr_native_value
 	def update(A):A.schedule_update_ha_state()
