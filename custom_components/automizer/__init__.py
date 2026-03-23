@@ -119,7 +119,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _LOGGER.info(f"READ EXPORT LINE: {exportLine}")
             # print("READ EXPORT LINE: " + exportLine)
             deviceName = match.group("deviceName")
-            deviceId = match.group("deviceId")
+            deviceId = match.group("deviceType")  # deviceType captures the hardware address (e.g. 0x01020001); deviceId captures the default value (always 0x00000000)
             fullDeviceName = entry.data[CONF_CU_NAME] + "_" + deviceName
 
             # BINARY_INPUT -> sensor(bool)
