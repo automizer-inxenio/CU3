@@ -25,9 +25,9 @@ class InelsBinarySensor(BinarySensorEntity):
     def __init__(self, inelsName, inelsId):
         self._attr_name = inelsName
         self._attr_is_on = False
+        self._attr_unique_id = inelsName + inelsId
         self.inelsName = inelsName
         self.inelsId = inelsId
-        self.unique_id = inelsName + inelsId
         self.ic = None
 
     @property
@@ -44,9 +44,9 @@ class InelsTemperatureSensor(SensorEntity):
         self._attr_name = inelsName
         self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
         # self._attr_native_value = 77.7
+        self._attr_unique_id = inelsName + inelsId
         self.inelsName = inelsName
         self.inelsId = inelsId
-        self.unique_id = inelsName + inelsId
         self._attr_icon = "mdi:thermometer"
         self.ic = None
         self.refreshSeconds = refreshSeconds
@@ -65,9 +65,9 @@ class InelsAnalogSensor(SensorEntity):
     def __init__(self, inelsName, inelsId, decimals=3, refreshSeconds=1):
         self._attr_name = inelsName
         self._attr_native_unit_of_measurement = UnitOfElectricPotential.MILLIVOLT
+        self._attr_unique_id = inelsName + inelsId
         self.inelsName = inelsName
         self.inelsId = inelsId
-        self.unique_id = inelsName + inelsId
         self._attr_icon = "mdi:gauge"
         self.decimals = decimals
         self.refreshSeconds = refreshSeconds
@@ -87,9 +87,9 @@ class InelsHumiditySensor(SensorEntity):
         self._attr_name = inelsName
         self._attr_native_unit_of_measurement = PERCENTAGE
         # self._attr_native_value = 77.7
+        self._attr_unique_id = inelsName + inelsId
         self.inelsName = inelsName
         self.inelsId = inelsId
-        self.unique_id = inelsName + inelsId
         self._attr_icon = "mdi:water-percent"
         self.ic = None
         self.refreshSeconds = refreshSeconds
@@ -107,9 +107,9 @@ class InelsTextSensor(SensorEntity):
     def __init__(self, inelsName, inelsId):
         self._attr_name = inelsName
         self._attr_native_value = "STOP"
+        self._attr_unique_id = inelsName + inelsId
         self.inelsName = inelsName
         self.inelsId = inelsId
-        self.unique_id = inelsName + inelsId
         self.ic = None
 
     @property

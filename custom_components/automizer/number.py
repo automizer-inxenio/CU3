@@ -23,9 +23,9 @@ class InelsNumber(NumberEntity):
         self._attr_native_min_value = -10000
         self._attr_native_max_value = 10000
         self._attr_native_value = 20.0
+        self._attr_unique_id = inelsName + inelsId
         self.inelsName = inelsName
         self.inelsId = inelsId
-        self.unique_id = inelsName + inelsId
         self.decimals = decimals
         self.ic = None
 
