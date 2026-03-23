@@ -11,10 +11,28 @@
         "step": {
             "user": {
                 "data": {
+                    "cuName": "CU Name",
+                    "export": "Export",
                     "host": "Host",
-                    "password": "Password",
-                    "username": "Username"
-                }
+                    "port": "Port",
+                    "serial": "Serial number"
+                },
+                "description": "Installation identifier: {ha_id}"
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "cuName": "CU Name",
+                    "export": "Export",
+                    "host": "Host",
+                    "port": "Port",
+                    "serial": "Serial number"
+                },
+                "description": "Identificador de instalaci\u00f3n: {ha_id}",
+                "title": "Configuraci\u00f3n"
             }
         }
     }

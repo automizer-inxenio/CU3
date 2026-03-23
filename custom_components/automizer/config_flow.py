@@ -11,7 +11,7 @@ import telnetlib3
 
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST, CONF_USERNAME, CONF_PORT
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 
 # from .const import DOMAIN, CONF_EXPORT, CONF_CU_NAME, CONF_INSTALLER, CONF_SERIAL
@@ -152,7 +152,7 @@ class ConfigFlow(ConfigFlow, domain=c.DOMAIN):
 
         STEP_USER_DATA_SCHEMA = vol.Schema(
             {
-                vol.Required(c.CONF_SERIAL, None, "Serial number for: " + haID): str,
+                vol.Required(c.CONF_SERIAL): str,
                 vol.Required(c.CONF_CU_NAME): str,
                 vol.Required(CONF_HOST): str,
                 vol.Required(CONF_PORT): int,
@@ -163,8 +163,17 @@ class ConfigFlow(ConfigFlow, domain=c.DOMAIN):
         STEP_USER_DATA_SCHEMA.schema[vol.Required(c.CONF_EXPORT)]
 
         return self.async_show_form(
-            step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+            step_id="user",
+            data_schema=STEP_USER_DATA_SCHEMA,
+            description_placeholders={"ha_id": haID},
+            errors=errors,
         )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        from .options_flow import AutomizerOptionsFlowHandler
+        return AutomizerOptionsFlowHandler()
 
 
 class CannotConnect(HomeAssistantError):

@@ -75,7 +75,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "binarySensors": [],
         "ic": None,
     }
-    export = entry.data[CONF_EXPORT]
+    export = entry.options.get(CONF_EXPORT) or entry.data[CONF_EXPORT]
+    cu_host = entry.options.get(CONF_HOST) or entry.data[CONF_HOST]
+    cu_port = entry.options.get(CONF_PORT) or entry.data[CONF_PORT]
+    cu_name = entry.options.get(CONF_CU_NAME) or entry.data[CONF_CU_NAME]
     exportLines = export.splitlines()
     rDevice = re.compile(
         # Formato 3 columnas: nombre  ID            valor
@@ -141,7 +144,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             if any(deviceName.startswith(p) for p in _INTERNAL_DEVICE_PREFIXES):
                 continue
 
-            fullDeviceName = entry.data[CONF_CU_NAME] + "_" + deviceName
+            fullDeviceName = cu_name + "_" + deviceName
 
             # BINARY_INPUT -> sensor(bool)
             if deviceId.startswith("0x0101"):
@@ -266,14 +269,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # AÑADIOS UN SENSOR DE TIPO TEXTO PARA EL ESTADO DE LA CENTRALITA
     cuStateSensor = s.InelsTextSensor(
-        entry.data[CONF_CU_NAME] + "_status", entry.data[CONF_CU_NAME] + "_status"
+        cu_name + "_status", cu_name + "_status"
     )
     hass.data[DOMAIN][entry.entry_id]["textSensors"].append(cuStateSensor)
 
     # AÑADIMOS UN SENSOR DE TIPO BINARIO PARA EL ESTADO DE LA CONEXION DE TELNET
     clientConnectionStatus = s.InelsBinarySensor(
-        entry.data[CONF_CU_NAME] + "_client_connected",
-        entry.data[CONF_CU_NAME] + "_status",
+        cu_name + "_client_connected",
+        cu_name + "_status",
     )
     hass.data[DOMAIN][entry.entry_id]["binarySensors"].append(clientConnectionStatus)
 
@@ -290,9 +293,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # LANZAOS EL CLIENTE DE TELNET
     cu = inelsObj.InelsCentralUnit(
-        entry.data[CONF_CU_NAME],
-        entry.data[CONF_HOST],
-        entry.data[CONF_PORT],
+        cu_name,
+        cu_host,
+        cu_port,
     )
 
     storage = hass.data[DOMAIN][entry.entry_id]
@@ -309,12 +312,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     storage["ic"].start()
 
     return True
-
-
-async def async_get_options_flow(config_entry):
-    from .options_flow import AutomizerOptionsFlowHandler
-
-    return AutomizerOptionsFlowHandler(config_entry)
 
 
 # TODO Update entry annotation
