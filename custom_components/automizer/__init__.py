@@ -26,7 +26,6 @@ from .const import DOMAIN, CONF_EXPORT, CONF_CU_NAME, CONF_YAML_CONFIG
 import re
 import uuid
 import time
-import os
 import logging
 import yaml
 
@@ -90,7 +89,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         r"(?P<deviceId>0x[0-9A-Fa-f]+)"
     )
 
-    # 1. YAML desde opciones de la integración (UI)
     yaml_config_str = entry.options.get(CONF_YAML_CONFIG) or entry.data.get(CONF_YAML_CONFIG, "")
     if yaml_config_str.strip():
         try:
@@ -100,26 +98,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _LOGGER.error(f"Error al parsear el YAML de configuración desde opciones: {e}")
             config_data = {}
     else:
-        # 2. Archivo override en el directorio de HA
-        # 3. Archivo por defecto del paquete (fallback)
-        config_file_user = os.path.join(hass.config.config_dir, "automizer_configuration.yaml")
-        config_file_default = os.path.join(os.path.dirname(__file__), "configuration.yaml")
-
-        if os.path.exists(config_file_user):
-            config_file = config_file_user
-            _LOGGER.info(f"Usando configuración personalizada: {config_file}")
-        else:
-            config_file = config_file_default
-            _LOGGER.info(f"No se encontró automizer_configuration.yaml en {hass.config.config_dir}, usando valores por defecto del paquete.")
-
-        try:
-            config_data = await hass.async_add_executor_job(read_yaml_file, config_file)
-        except FileNotFoundError:
-            _LOGGER.info(f"No se encontró el archivo {config_file}.")
-            config_data = {}
-        except yaml.YAMLError as e:
-            _LOGGER.error(f"Error al leer el archivo {config_file} YAML: {e}")
-            config_data = {}
+        config_data = {}
 
     if config_data is None:
         _LOGGER.warning("El archivo de configuración está vacío o es inválido.")
@@ -371,7 +350,4 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return await async_setup_entry(hass, entry)
 
 
-def read_yaml_file(file_path):
-    """Función auxiliar para leer un archivo YAML."""
-    with open(file_path, "r") as file:
-        return yaml.safe_load(file)
+
