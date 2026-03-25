@@ -29,7 +29,8 @@
                     "export": "Export",
                     "host": "Host",
                     "port": "Port",
-                    "serial": "Serial number"
+                    "serial": "Serial number",
+                    "yaml_config": "Configuraci\u00f3n avanzada (YAML)"
                 },
                 "description": "Identificador de instalaci\u00f3n: {ha_id}",
                 "title": "Configuraci\u00f3n"

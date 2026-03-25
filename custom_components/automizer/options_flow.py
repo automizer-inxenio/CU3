@@ -36,6 +36,7 @@ class AutomizerOptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Required(CONF_PORT, default=current.get(CONF_PORT, 1111)): int,
                     vol.Required(c.CONF_CU_NAME, default=current.get(c.CONF_CU_NAME, "")): str,
                     vol.Required(c.CONF_EXPORT, default=current.get(c.CONF_EXPORT, "")): WS_HEADERS_SELECTOR,
+                    vol.Optional(c.CONF_YAML_CONFIG, default=current.get(c.CONF_YAML_CONFIG, "")): WS_HEADERS_SELECTOR,
                 }
             ),
         )

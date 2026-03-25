@@ -31,7 +31,8 @@
           "cuName": "CU Name",
           "host": "[%key:common::config_flow::data::host%]",
           "port": "[%key:common::config_flow::data::port%]",
-          "export": "Export"
+          "export": "Export",
+          "yaml_config": "Configuración avanzada (YAML)"
         }
       }
     }
