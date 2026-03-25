@@ -165,70 +165,80 @@ class InelsClient2:
 
             foundValue = self.entities.get(inelsId)
             if foundValue:
-                if isinstance(foundValue.entity, s.InelsTemperatureSensor):
-                    if foundValue.entity.refreshSeconds > 0:
-                        nextRefreshPoint = foundValue.entity.lastUpdate + foundValue.entity.refreshSeconds
+                try:
+                    if isinstance(foundValue.entity, s.InelsTemperatureSensor):
+                        if foundValue.entity.refreshSeconds > 0:
+                            nextRefreshPoint = foundValue.entity.lastUpdate + foundValue.entity.refreshSeconds
+                            if time.time() < nextRefreshPoint:
+                                return
+                            foundValue.entity.lastUpdate = time.time()
+                        foundValue.entity._attr_native_value = int(cuValue) / 100
+                    elif isinstance(foundValue.entity, s.InelsHumiditySensor):
+                        foundValue.entity._attr_native_value = int(cuValue) / 100
+                    elif isinstance(foundValue.entity, s.InelsBinarySensor):
+                        foundValue.entity._attr_is_on = cuValue != "0"
+                    elif isinstance(foundValue.entity, sw.InelsSwitch):
+                        foundValue.entity._state = cuValue != "0"
+                    elif isinstance(foundValue.entity, n.InelsNumber):
+                        decimals = foundValue.entity.decimals
+                        foundValue.entity._attr_native_value = round(int(cuValue) / (10**decimals), decimals)
+                    elif isinstance(foundValue.entity, s.InelsAnalogSensor):
+                        nextRefreshPoint = (
+                            foundValue.entity.lastUpdate + foundValue.entity.refreshSeconds
+                        )
                         if time.time() < nextRefreshPoint:
                             return
                         foundValue.entity.lastUpdate = time.time()
-                    foundValue.entity._attr_native_value = int(cuValue) / 100
-                elif isinstance(foundValue.entity, s.InelsHumiditySensor):
-                    foundValue.entity._attr_native_value = int(cuValue) / 100
-                elif isinstance(foundValue.entity, s.InelsBinarySensor):
-                    foundValue.entity._attr_is_on = cuValue != "0"
-                elif isinstance(foundValue.entity, sw.InelsSwitch):
-                    foundValue.entity._state = cuValue != "0"
-                elif isinstance(foundValue.entity, n.InelsNumber):
-                    decimals = foundValue.entity.decimals
-                    foundValue.entity._attr_native_value = round(int(cuValue) / (10**decimals), decimals)
-                elif isinstance(foundValue.entity, s.InelsAnalogSensor):
-                    nextRefreshPoint = (
-                        foundValue.entity.lastUpdate + foundValue.entity.refreshSeconds
-                    )
-                    if time.time() < nextRefreshPoint:
-                        return
-                    foundValue.entity.lastUpdate = time.time()
-                    decimals = foundValue.entity.decimals
-                    foundValue.entity._attr_native_value = round(int(cuValue) / (10**decimals), decimals)
-                elif isinstance(foundValue.entity, l.InelsLight):
-                    intValue = utils.scaleValue0255(int(cuValue))
-                    foundValue.entity._state = intValue != 0
-                    if intValue != 0:
-                        foundValue.entity._brightness = intValue
+                        decimals = foundValue.entity.decimals
+                        foundValue.entity._attr_native_value = round(int(cuValue) / (10**decimals), decimals)
+                    elif isinstance(foundValue.entity, l.InelsLight):
+                        intValue = utils.scaleValue0255(int(cuValue))
+                        foundValue.entity._state = intValue != 0
+                        if intValue != 0:
+                            foundValue.entity._brightness = intValue
 
-                foundValue.entity.update()
+                    foundValue.entity.update()
+                except (ValueError, IndexError) as e:
+                    _LOGGER.warning(
+                        f"Valor inválido en EVENT para {inelsId}: {cuValue!r} — {e}"
+                    )
+                    return
         elif line.startswith("GET"):
             parts = line.split(" ")
             if len(parts) < 3:
                 return
             inelsId = parts[1].lower()
             cuValue = parts[2]
-            if not cuValue.isdigit():
-                return
 
             foundValue = self.entities.get(inelsId)
             if foundValue:
-                if isinstance(foundValue.entity, s.InelsTemperatureSensor):
-                    foundValue.entity._attr_native_value = int(cuValue) / 100
-                elif isinstance(foundValue.entity, s.InelsHumiditySensor):
-                    foundValue.entity._attr_native_value = int(cuValue) / 100
-                elif isinstance(foundValue.entity, s.InelsBinarySensor):
-                    foundValue.entity._attr_is_on = cuValue != "0"
-                elif isinstance(foundValue.entity, sw.InelsSwitch):
-                    foundValue.entity._state = cuValue != "0"
-                elif isinstance(foundValue.entity, n.InelsNumber):
-                    decimals = foundValue.entity.decimals
-                    foundValue.entity._attr_native_value = round(int(cuValue) / (10**decimals), decimals)
-                elif isinstance(foundValue.entity, s.InelsAnalogSensor):
-                    decimals = foundValue.entity.decimals
-                    foundValue.entity._attr_native_value = round(int(cuValue) / (10**decimals), decimals)
-                elif isinstance(foundValue.entity, l.InelsLight):
-                    intValue = int(cuValue)
-                    foundValue.entity._state = intValue != 0
-                    if intValue != 0:
-                        foundValue.entity._brightness = intValue
+                try:
+                    if isinstance(foundValue.entity, s.InelsTemperatureSensor):
+                        foundValue.entity._attr_native_value = int(cuValue) / 100
+                    elif isinstance(foundValue.entity, s.InelsHumiditySensor):
+                        foundValue.entity._attr_native_value = int(cuValue) / 100
+                    elif isinstance(foundValue.entity, s.InelsBinarySensor):
+                        foundValue.entity._attr_is_on = cuValue != "0"
+                    elif isinstance(foundValue.entity, sw.InelsSwitch):
+                        foundValue.entity._state = cuValue != "0"
+                    elif isinstance(foundValue.entity, n.InelsNumber):
+                        decimals = foundValue.entity.decimals
+                        foundValue.entity._attr_native_value = round(int(cuValue) / (10**decimals), decimals)
+                    elif isinstance(foundValue.entity, s.InelsAnalogSensor):
+                        decimals = foundValue.entity.decimals
+                        foundValue.entity._attr_native_value = round(int(cuValue) / (10**decimals), decimals)
+                    elif isinstance(foundValue.entity, l.InelsLight):
+                        intValue = int(cuValue)
+                        foundValue.entity._state = intValue != 0
+                        if intValue != 0:
+                            foundValue.entity._brightness = intValue
 
-                foundValue.entity.update()
+                    foundValue.entity.update()
+                except (ValueError, IndexError) as e:
+                    _LOGGER.warning(
+                        f"Valor inválido en GET para {inelsId}: {cuValue!r} — {e}"
+                    )
+                    return
 
     def sendLine(self, line):
         with self.lock:
