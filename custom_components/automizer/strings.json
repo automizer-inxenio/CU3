@@ -35,6 +35,9 @@
           "yaml_config": "Configuración avanzada (YAML)"
         }
       }
+    },
+    "error": {
+      "invalid_yaml": "El contenido YAML no es válido. Revisa la sintaxis."
     }
   }
 }

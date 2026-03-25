@@ -22,6 +22,9 @@
         }
     },
     "options": {
+        "error": {
+            "invalid_yaml": "El contenido YAML no es v\u00e1lido. Revisa la sintaxis."
+        },
         "step": {
             "init": {
                 "data": {
