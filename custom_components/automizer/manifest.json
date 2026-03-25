@@ -1,7 +1,7 @@
 {
     "domain": "automizer",
     "name": "automizer",
-    "version": "v0.0.45",
+    "version": "v0.0.46",
     "codeowners": [
         "@automizer-inxenio"
     ],
