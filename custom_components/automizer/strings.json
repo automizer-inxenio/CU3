@@ -2,12 +2,13 @@
   "config": {
     "step": {
       "user": {
-        "description": "Installation identifier: {ha_id}",
         "data": {
+          "host": "[%key:common::config_flow::data::host%]",
+          "username": "[%key:common::config_flow::data::username%]",
+          "password": "[%key:common::config_flow::data::password%]",
           "serial": "Serial number",
           "cuName": "CU Name",
-          "host": "[%key:common::config_flow::data::host%]",
-          "port": "[%key:common::config_flow::data::port%]",
+          "port": "Port",
           "export": "Export"
         }
       }
@@ -24,20 +25,15 @@
   "options": {
     "step": {
       "init": {
-        "title": "Configuración",
-        "description": "Identificador de instalación: {ha_id}",
+        "description": "Identificador de instalación: {installation_id}",
         "data": {
           "serial": "Serial number",
           "cuName": "CU Name",
-          "host": "[%key:common::config_flow::data::host%]",
-          "port": "[%key:common::config_flow::data::port%]",
-          "export": "Export",
-          "yaml_config": "Configuración avanzada (YAML)"
+          "host": "Host",
+          "port": "Port",
+          "export": "Export"
         }
       }
-    },
-    "error": {
-      "invalid_yaml": "El contenido YAML no es válido. Revisa la sintaxis."
     }
   }
 }

@@ -9,7 +9,7 @@ import voluptuous as vol
 import asyncio
 import telnetlib3
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST, CONF_USERNAME, CONF_PORT
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
@@ -18,6 +18,7 @@ from homeassistant.exceptions import HomeAssistantError
 
 from . import const as c
 from . import utils as utils
+from .options_flow import AutomizerOptionsFlowHandler
 
 from homeassistant.helpers.selector import (
     TextSelector,
@@ -70,7 +71,7 @@ class PlaceholderHub:
             )
             writer.close()
             return True
-        except (asyncio.TimeoutError, ConnectionRefusedError, OSError):
+        except asyncio.TimeoutError, ConnectionRefusedError, OSError:
             return False
 
 
@@ -129,6 +130,14 @@ class ConfigFlow(ConfigFlow, domain=c.DOMAIN):
 
     #    VERSION = 1
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: ConfigEntry,
+    ) -> AutomizerOptionsFlowHandler:
+        """Create the options flow."""
+        return AutomizerOptionsFlowHandler()
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
@@ -152,7 +161,7 @@ class ConfigFlow(ConfigFlow, domain=c.DOMAIN):
 
         STEP_USER_DATA_SCHEMA = vol.Schema(
             {
-                vol.Required(c.CONF_SERIAL): str,
+                vol.Required(c.CONF_SERIAL, None, "Serial number for: " + haID): str,
                 vol.Required(c.CONF_CU_NAME): str,
                 vol.Required(CONF_HOST): str,
                 vol.Required(CONF_PORT): int,
@@ -163,17 +172,8 @@ class ConfigFlow(ConfigFlow, domain=c.DOMAIN):
         STEP_USER_DATA_SCHEMA.schema[vol.Required(c.CONF_EXPORT)]
 
         return self.async_show_form(
-            step_id="user",
-            data_schema=STEP_USER_DATA_SCHEMA,
-            description_placeholders={"ha_id": haID},
-            errors=errors,
+            step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )
-
-    @staticmethod
-    @callback
-    def async_get_options_flow(config_entry):
-        from .options_flow import AutomizerOptionsFlowHandler
-        return AutomizerOptionsFlowHandler()
 
 
 class CannotConnect(HomeAssistantError):
