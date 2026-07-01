@@ -19,27 +19,20 @@ class InelsNumber(NumberEntity):
 
     def __init__(self, inelsName, inelsId, decimals=2):
         self._attr_name = inelsName
-        self._attr_step = 1 / (10**decimals)  # Ajustar el paso según los decimales
-        self.native_min_value = -10000
-        self.native_max_value = 10000
-        self._attr_value = 20.0
+        self._attr_native_step = 1 / (10**decimals)
+        self._attr_native_min_value = -10000
+        self._attr_native_max_value = 10000
+        self._attr_native_value = 20.0
+        self._attr_unique_id = inelsName + inelsId
         self.inelsName = inelsName
         self.inelsId = inelsId
-        self.unique_id = inelsName + inelsId
-        self.decimals = decimals  # Número de decimales configurables
+        self.decimals = decimals
         self.ic = None
 
-    @property
-    def value(self):
-        """Devuelve el valor actual del número."""
-        return round(self._attr_value, self.decimals)
-
-    def set_value(self, value):
+    def set_native_value(self, value: float) -> None:
         """Establece el valor del número."""
-        self._attr_value = round(
-            value, self.decimals
-        )  # Redondear al número de decimales
-        self.ic.sendLine("SET " + self.inelsId + " " + str(self._attr_value))
+        self._attr_native_value = round(value, self.decimals)
+        self.ic.sendLine("SET " + self.inelsId + " " + str(self._attr_native_value))
         self.schedule_update_ha_state()
 
     def update(self):

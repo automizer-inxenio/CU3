@@ -23,18 +23,13 @@ async def async_setup_entry(
 
 class InelsLight(LightEntity):
     def __init__(self, inelsName, inelsId):
-        self._name = inelsName
+        self._attr_name = inelsName
+        self._attr_unique_id = inelsName + inelsId
         self.inelsName = inelsName
         self.inelsId = inelsId
         self._state = False
-        self.unique_id = inelsName + inelsId
         self._brightness = 255
         self.ic = None
-
-    @property
-    def name(self):
-        """Devuelve el nombre de la luz."""
-        return self._name
 
     @property
     def is_on(self):

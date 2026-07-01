@@ -20,16 +20,12 @@ class InelsSwitch(ToggleEntity):
         inelsName,
         inelsId,
     ):
-        self._name = inelsName
+        self._attr_name = inelsName
+        self._attr_unique_id = inelsName + inelsId
         self.inelsId = inelsId
         self.inelsName = inelsName
         self._state = False
-        self.unique_id = inelsName + inelsId
         self.ic = None
-
-    @property
-    def name(self):
-        return self._name
 
     @property
     def is_on(self):

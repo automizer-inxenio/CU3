@@ -11,28 +11,32 @@
         "step": {
             "user": {
                 "data": {
-                    "host": "Host",
-                    "password": "Password",
-                    "username": "Username",
-                    "serial": "Serial number",
                     "cuName": "CU Name",
+                    "export": "Export",
+                    "host": "Host",
                     "port": "Port",
-                    "export": "Export"
-                }
+                    "serial": "Serial number"
+                },
+                "description": "Installation identifier: {ha_id}"
             }
         }
     },
     "options": {
+        "error": {
+            "invalid_yaml": "El contenido YAML no es v\u00e1lido. Revisa la sintaxis."
+        },
         "step": {
             "init": {
-                "description": "Identificador de instalación: {installation_id}",
                 "data": {
-                    "serial": "Serial number",
                     "cuName": "CU Name",
+                    "export": "Export",
                     "host": "Host",
                     "port": "Port",
-                    "export": "Export"
-                }
+                    "serial": "Serial number",
+                    "yaml_config": "Configuraci\u00f3n avanzada (YAML)"
+                },
+                "description": "Identificador de instalaci\u00f3n: {ha_id}",
+                "title": "Configuraci\u00f3n"
             }
         }
     }

@@ -22,15 +22,23 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 import asyncio
 
-from .const import DOMAIN, CONF_EXPORT, CONF_CU_NAME
+from .const import DOMAIN, CONF_EXPORT, CONF_CU_NAME, CONF_YAML_CONFIG
 import re
 import uuid
 import time
-import os
 import logging
 import yaml
 
 _LOGGER = logging.getLogger(__name__)
+
+# Prefijos de nombres internos de iNELS que no se deben exponer como entidades.
+# Respaldo para exportaciones antiguas (3 columnas) donde las líneas internas
+# no tienen prefijo "_ ". En el formato real (.is3) ya las filtra el startswith("_").
+_INTERNAL_DEVICE_PREFIXES = (
+    "Controller_",
+    "Heat-Regulator_",
+    "Cool-Regulator_",
+)
 
 # Lista de plataformas soportadas
 _PLATFORMS: list[Platform] = [
@@ -66,29 +74,48 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "binarySensors": [],
         "ic": None,
     }
-    export = entry.data[CONF_EXPORT]
+    export = entry.options.get(CONF_EXPORT) or entry.data[CONF_EXPORT]
+    cu_host = entry.options.get(CONF_HOST) or entry.data[CONF_HOST]
+    cu_port = entry.options.get(CONF_PORT) or entry.data[CONF_PORT]
+    cu_name = entry.options.get(CONF_CU_NAME) or entry.data[CONF_CU_NAME]
     exportLines = export.splitlines()
     rDevice = re.compile(
-        r"(?P<deviceName>[a-zA-Z0-9_-]+)\s(?P<deviceType>[a-zA-Z0-9_-]+)\s(?P<deviceId>[0-9A-F,x]+)"
+        # Formato 3 columnas: nombre  ID            valor
+        # Formato 4 columnas: nombre  módulo        ID            valor
+        # El módulo (2ª columna en formato 4-col) empieza siempre por letra,
+        # nunca por "0x", así que el grupo opcional no consume el ID.
+        r"^(?P<deviceName>[a-zA-Z0-9_-]+)"
+        r"\s+(?:[A-Za-z]\S*\s+)?"
+        r"(?P<deviceId>0x[0-9A-Fa-f]+)"
     )
 
-    # config_file = "configuration.yaml"
-    config_file = os.path.join(os.path.dirname(__file__), "configuration.yaml")
+    yaml_config_str = entry.options.get(CONF_YAML_CONFIG) or entry.data.get(CONF_YAML_CONFIG, "")
+    if yaml_config_str.strip():
+        try:
+            config_data = yaml.safe_load(yaml_config_str)
+            _LOGGER.info("Usando configuración YAML desde opciones de la integración.")
+        except yaml.YAMLError as e:
+            _LOGGER.error(f"Error al parsear el YAML de configuración desde opciones: {e}")
+            config_data = {}
+    else:
+        config_data = {}
 
-    try:
-        config_data = await hass.async_add_executor_job(read_yaml_file, config_file)
-    except FileNotFoundError:
-        _LOGGER.info(f"No se encontró el archivo {config_file}.")
+    if config_data is None:
+        _LOGGER.warning("El archivo de configuración está vacío o es inválido.")
         config_data = {}
-    except yaml.YAMLError as e:
-        _LOGGER.error(f"Error al leer el archivo {config_file} YAML: {e}")
-        config_data = {}
+
+    _LOGGER.info(f"config_data completo: {config_data}")
+
+    automizer_section = config_data.get("automizer", {})
+    _LOGGER.info(f"Sección automizer: {automizer_section}")
 
     # Procesar la configuración de números
-    numbers_config = config_data.get("automizer", {}).get("numbers", [])
+    numbers_config = automizer_section.get("numbers", [])
     _LOGGER.info(f"Configuración de números cargada: {numbers_config}")
-    analogSensors_config = config_data.get("automizer", {}).get("analog", [])
-    _LOGGER.info(f"Configuración de sensores analógicos cargada: {numbers_config}")
+    analogSensors_config = automizer_section.get("analog", [])
+    _LOGGER.info(
+        f"Configuración de sensores analógicos cargada: {analogSensors_config}"
+    )
 
     for exportLine in exportLines:
         if exportLine.startswith("_"):
@@ -100,7 +127,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             # print("READ EXPORT LINE: " + exportLine)
             deviceName = match.group("deviceName")
             deviceId = match.group("deviceId")
-            fullDeviceName = entry.data[CONF_CU_NAME] + "_" + deviceName
+
+            # Filtro de respaldo: ignorar dispositivos internos de iNELS
+            # (en el formato .is3 real ya van con "_ " y son filtrados arriba)
+            if any(deviceName.startswith(p) for p in _INTERNAL_DEVICE_PREFIXES):
+                continue
+
+            fullDeviceName = cu_name + "_" + deviceName
 
             # BINARY_INPUT -> sensor(bool)
             if deviceId.startswith("0x0101"):
@@ -131,6 +164,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                         if item["name"] == inelsTemperatureSensorToFind
                     ),
                     0,  # Valor predeterminado si no se encuentra el item
+                )
+                _LOGGER.info(
+                    f"[TEMP] {inelsTemperatureSensorToFind}: refresh_seconds={refresh_seconds}"
                 )
 
                 newDevice = s.InelsTemperatureSensor(
@@ -222,14 +258,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # AÑADIOS UN SENSOR DE TIPO TEXTO PARA EL ESTADO DE LA CENTRALITA
     cuStateSensor = s.InelsTextSensor(
-        entry.data[CONF_CU_NAME] + "_status", entry.data[CONF_CU_NAME] + "_status"
+        cu_name + "_status", cu_name + "_status"
     )
     hass.data[DOMAIN][entry.entry_id]["textSensors"].append(cuStateSensor)
 
     # AÑADIMOS UN SENSOR DE TIPO BINARIO PARA EL ESTADO DE LA CONEXION DE TELNET
     clientConnectionStatus = s.InelsBinarySensor(
-        entry.data[CONF_CU_NAME] + "_client_connected",
-        entry.data[CONF_CU_NAME] + "_status",
+        cu_name + "_client_connected",
+        cu_name + "_status",
     )
     hass.data[DOMAIN][entry.entry_id]["binarySensors"].append(clientConnectionStatus)
 
@@ -246,9 +282,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # LANZAOS EL CLIENTE DE TELNET
     cu = inelsObj.InelsCentralUnit(
-        entry.data[CONF_CU_NAME],
-        entry.data[CONF_HOST],
-        entry.data[CONF_PORT],
+        cu_name,
+        cu_host,
+        cu_port,
     )
 
     storage = hass.data[DOMAIN][entry.entry_id]
@@ -263,20 +299,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entity.ic = storage["ic"]
 
     storage["ic"].start()
-    await asyncio.sleep(3)
-    storage["ic"].sendLine("GETSTATUS")
-
-    for e in storage["allEntities"]:
-        storage["ic"].sendLine("GET " + e.inelsId)
-        await asyncio.sleep(0.2)
 
     return True
-
-
-async def async_get_options_flow(config_entry):
-    from .options_flow import AutomizerOptionsFlowHandler
-
-    return AutomizerOptionsFlowHandler(config_entry)
 
 
 # TODO Update entry annotation
@@ -326,7 +350,4 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return await async_setup_entry(hass, entry)
 
 
-def read_yaml_file(file_path):
-    """Función auxiliar para leer un archivo YAML."""
-    with open(file_path, "r") as file:
-        return yaml.safe_load(file)
+
